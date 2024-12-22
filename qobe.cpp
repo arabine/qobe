@@ -10,9 +10,7 @@ namespace fs = std::filesystem;
 
 static const char *defaultHeader = R"(
 <h1>D8S EURL blog</h1>
-<div class="navbar">
-    <a href="index.html">Home</a>
-</div>
+
 )";
 
 static std::string customHeader;
@@ -100,23 +98,47 @@ code {
     border-radius: 5px;
 }
 
-.navbar {
-    background-color: #007BFF;
-    color: #fff;
-    padding: 10px;
-    text-align: center;
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1em;
+    font-family: 'Arial', sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
-.navbar a {
-    color: #fff;
-    margin: 0 15px;
-    text-decoration: none;
+table thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
     font-weight: bold;
 }
 
-.navbar a:hover {
-    text-decoration: underline;
+table th,
+table td {
+    padding: 12px 15px;
 }
+
+table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+table tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
 )";
 
 std::tuple<std::string, std::string, std::string> removeYAMLHeaderAndExtractTitle(const std::string& markdown) {
@@ -151,6 +173,48 @@ std::tuple<std::string, std::string, std::string> removeYAMLHeaderAndExtractTitl
     return {result.str(), title, date};
 }
 
+
+// Function to split a string by a delimiter
+std::vector<std::string> split(const std::string& str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(str);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+/*
+// Function to trim whitespace from a string
+std::string trim(const std::string& str) {
+    size_t first = str.find_first_not_of(' ');
+    if (std::string::npos == first) {
+        return str;
+    }
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+}*/
+
+// trim from end of string (right)
+inline std::string& rtrim(std::string& s)
+{
+    s.erase(s.find_last_not_of(' ') + 1);
+    return s;
+}
+
+// trim from beginning of string (left)
+inline std::string& ltrim(std::string& s)
+{
+    s.erase(0, s.find_first_not_of(' '));
+    return s;
+}
+
+// trim from both ends of string (right then left)
+inline std::string& trim(std::string& s)
+{
+    return ltrim(rtrim(s));
+}
+
 std::string markdownToHTML(const std::string& markdown) {
     std::string html;
     std::istringstream stream(markdown);
@@ -162,23 +226,99 @@ std::string markdownToHTML(const std::string& markdown) {
     std::regex underlineRegex("__(.*?)__");
     std::regex imageRegex("!\\[(.*?)\\]\\((.*?)\\)");
     std::regex bulletPointRegex("^(\\s*[-*])\\s+(.*)$");
+    std::regex tableStartRegex(R"(^\s*\|.*\|\s*$)");
     std::smatch match;
     bool inCodeBlock = false;
     bool inList = false;
+    
+    // table states
+    bool inTable = false;
+    int tableRow = 0;
+    std::vector<std::string> rowAlignemnts;
+
     std::string language;
 
     while (std::getline(stream, line)) {
-        if (std::regex_match(line, match, codeBlockRegex)) {
-            if (inCodeBlock) {
+        if (inCodeBlock) {
+
+            if (std::regex_match(line, match, codeBlockRegex)) {
                 html += "</code></pre>\n";
                 inCodeBlock = false;
             } else {
+                html += line + "\n";
+            }
+            
+
+        } else if (std::regex_match(line, match, tableStartRegex)) {
+  
+            if (!inTable) {
+                html += "<table>\n";
+                inTable = true;
+                tableRow = 0;
+            }
+
+            line = trim(line);
+
+            std::vector<std::string> row = split(line, '|');
+            for (auto& cell : row) {
+                cell = trim(cell);
+            }
+
+            if (tableRow == 0) {
+                html += "<thead>\n<tr>\n";
+                for (const auto& cell : row) {
+                    html += "<th>" + cell + "</th>";
+                }
+                html += "\n</tr>\n</thead>\n<tbody>\n";
+
+            } else if (tableRow == 1) {
+            
+                // Parse markdown dashes and column alignment
+                rowAlignemnts.clear();
+                for (const auto& cell : row) {
+                    std::string alignment = "left";
+                    bool f = cell.front() && ':';
+                    auto b = cell.back() && ':';
+                    if (f && b) {
+                        alignment = "center";
+                    }
+                    else if (b) {
+                        alignment = "right";
+                    } else {
+                        alignment = "left";
+                    }
+                    rowAlignemnts.push_back(alignment);
+                }
+
+
+            } else {
+                html += "<tr>\n";
+                int i = 0;
+
+                if (row.size() != rowAlignemnts.size()) {
+                    std::cerr << "Error: Table alignment error, " << rowAlignemnts.size() << row.size() << line << std::endl;
+                    // Fix the alignment
+                    rowAlignemnts.clear();
+                    for (const auto& cell : row) {
+                        rowAlignemnts.push_back("left");
+                    }
+                }
+                
+
+                for (const auto& cell : row) {
+                    html += "<td style=\"text-align:" + rowAlignemnts[i++] + "\">" + cell + "</td>";
+                }
+                html += "\n</tr>\n";
+            }
+            tableRow++;
+
+
+        } else if (std::regex_match(line, match, codeBlockRegex)) {
+            if (!inCodeBlock) {
                 inCodeBlock = true;
                 language = match[1].str();
                 html += "<pre><code class=\"language-" + language + "\">\n";
             }
-        } else if (inCodeBlock) {
-            html += line + "\n";
         } else if (std::regex_match(line, match, headingRegex)) {
             if (inList) {
                 html += "</ul>\n";
@@ -200,11 +340,18 @@ std::string markdownToHTML(const std::string& markdown) {
                 inList = true;
             }
             html += "<li>" + match[2].str() + "</li>\n";
+
         } else {
             if (inList) {
                 html += "</ul>\n";
                 inList = false;
             }
+
+            if (inTable) {
+                html += "</tbody>\n</table>\n";
+                inTable = false;
+            }
+
             // Apply formatting (bold, italic, underline)
             line = std::regex_replace(line, boldRegex, "<b>$1</b>");
             line = std::regex_replace(line, italicRegex, "<i>$1</i>");
@@ -213,13 +360,6 @@ std::string markdownToHTML(const std::string& markdown) {
             // Wrap in paragraph
             html += "<p>" + line + "</p>\n";
         }
-    }
-
-    if (inCodeBlock) {
-        html += "</code></pre>\n";
-    }
-    if (inList) {
-        html += "</ul>\n";
     }
 
     return html;
@@ -240,7 +380,7 @@ void generateIndexPage(const std::string& outputDir, const std::vector<std::tupl
                   << "<link rel=\"stylesheet\" href=\"style.css\">\n"
                   << "</head>\n<body>\n";
                   
-        indexFile << customHeader << "\n";
+        indexFile << customHeader << "<div style=\"padding: 10px;\">\n";
 
         indexFile << "<h2>Blog Index - Page " << (page + 1) << "</h2>\n<ul>\n";
 
@@ -258,7 +398,7 @@ void generateIndexPage(const std::string& outputDir, const std::vector<std::tupl
             indexFile << "<a href=\"index" << (page + 2) << ".html\">Next</a>\n";
         }
 
-        indexFile << "</body>\n</html>\n";
+        indexFile << "</div></body>\n</html>\n";
     }
 }
 
