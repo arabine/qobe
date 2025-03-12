@@ -9,7 +9,9 @@
 namespace fs = std::filesystem;
 
 static const char *defaultHeader = R"(
-<h1>D8S EURL blog</h1>
+<header>
+    <h1>D8S EURL Blog</h1>
+</header>
 
 )";
 
@@ -17,6 +19,9 @@ static std::string customHeader;
 
 // Default CSS file 
 static const char *defaultCssFile = R"(
+/* ============================================================
+   🏠 GENERAL STYLES
+   ============================================================ */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -24,30 +29,175 @@ body {
     background-color: #f9f9f9;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    color: #222;
-    margin-top: 20px;
-    margin-bottom: 10px;
+/* ============================================================
+   📌 HEADER
+   ============================================================ */
+header {
+    background: #222;
+    color: white;
+    padding: 20px;
+    text-align: center;
 }
 
-h1 {
-    font-size: 2em;
+/* ============================================================
+   📌 FOOTER (Toujours collé en bas)
+   ============================================================ */
+footer {
+    background: #222;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    margin-top: auto;
 }
 
-h2 {
-    font-size: 1.75em;
+/* ============================================================
+   📌 MAIN LAYOUT
+   ============================================================ */
+.main-container {
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
 }
 
-h3 {
-    font-size: 1.5em;
+/* ============================================================
+   📌 SECTION PRINCIPALE (Blog)
+   ============================================================ */
+.content-container {
+    flex: 3;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-p {
-    margin: 10px 0;
+/* Liste des entrées de blog */
+ul.blog-list {
+    list-style: none;
+    padding: 0;
 }
 
+ul.blog-list li {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    transition: background 0.3s;
+}
+
+ul.blog-list li:hover {
+    background: #f5f5f5;
+}
+
+/* Style de la date */
+.blog-date {
+    font-weight: bold;
+    color: #555;
+    font-size: 0.9em;
+    margin-right: 10px;
+    padding: 5px 10px;
+    background: #eee;
+    border-radius: 5px;
+    min-width: 90px;
+    text-align: center;
+}
+
+/* Style du lien */
+.blog-link {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.blog-link:hover {
+    color: #0056b3;
+}
+
+/* Suppression de l’underscore par défaut */
+.blog-link:focus,
+.blog-link:active {
+    text-decoration: none;
+}
+
+/* ============================================================
+   📌 SIDEBAR (MOZAÏQUE DE PROJETS)
+   ============================================================ */
+.sidebar {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    margin-left: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h2 {
+    text-align: center;
+}
+
+/* ============================================================
+   📌 MOSAÏQUE DE PROJETS (Toujours sur 3 colonnes)
+   ============================================================ */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Toujours 3 colonnes */
+    gap: 10px;
+    justify-items: center;
+    padding-top: 10px;
+}
+
+/* Conteneur d'un projet */
+.project {
+    position: relative;
+    width: 100%;
+    max-width: 200px;
+}
+
+/* Image du projet */
+.project img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 5px;
+    transition: transform 0.3s ease;
+}
+
+/* Effet hover sur l'image */
+.project:hover img {
+    transform: scale(1.05);
+}
+
+/* Overlay avec titre */
+.overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 1em;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Afficher overlay au hover */
+.project:hover .overlay {
+    opacity: 1;
+}
+
+/* ============================================================
+   📌 LIENS & BOUTONS
+   ============================================================ */
 a {
     color: #007BFF;
     text-decoration: none;
@@ -57,87 +207,172 @@ a:hover {
     text-decoration: underline;
 }
 
-ul {
-    margin: 10px 0;
-    padding-left: 20px;
-}
-
-li {
-    margin: 5px 0;
-}
-
-img {
-    max-width: 100%;
-    height: auto;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    padding: 5px;
-    background-color: #fff;
-}
-
-pre {
-    background: #f4f4f4;
-    padding: 10px;
-    border: 1px solid #ddd;
-    overflow-x: auto;
-}
-
-code {
-    font-family: "Courier New", Courier, monospace;
-    background: #f4f4f4;
-    padding: 2px 4px;
-    border-radius: 4px;
-}
-
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    background: #fff;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+/* Bouton Next */
+.next-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: #007BFF;
+    color: white;
+    text-decoration: none;
     border-radius: 5px;
+    transition: background 0.3s;
 }
 
+.next-button:hover {
+    background: #0056b3;
+}
 
-/* Table styling */
-table {
+/* ============================================================
+   📌 ARTICLE PAGE STYLES
+   ============================================================ */
+.article-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.article-container h1 {
+    font-size: 2.2em;
+    color: #222;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.article-container h2 {
+    font-size: 1.8em;
+    margin-top: 30px;
+    color: #333;
+    border-bottom: 2px solid #007BFF;
+    padding-bottom: 5px;
+}
+
+.article-container h3 {
+    font-size: 1.5em;
+    margin-top: 20px;
+    color: #444;
+}
+
+.article-container p {
+    font-size: 1.1em;
+    line-height: 1.8;
+    color: #444;
+    margin-bottom: 15px;
+}
+
+/* Citations et notes */
+.article-container blockquote {
+    background: #f5f5f5;
+    border-left: 5px solid #007BFF;
+    margin: 20px 0;
+    padding: 15px;
+    font-style: italic;
+    color: #555;
+}
+
+/* Navigation retour */
+.back-button {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.back-button:hover {
+    background: #0056b3;
+}
+
+/* Tables */
+.article-container table {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
     font-size: 1em;
-    font-family: 'Arial', sans-serif;
-    min-width: 400px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-table thead tr {
-    background-color: #009879;
-    color: #ffffff;
+.article-container table thead tr {
+    background-color: #007BFF;
+    color: white;
     text-align: left;
     font-weight: bold;
 }
 
-table th,
-table td {
+.article-container table th,
+.article-container table td {
     padding: 12px 15px;
+    border: 1px solid #ddd;
 }
 
-table tbody tr {
-    border-bottom: 1px solid #dddddd;
-}
-
-table tbody tr:nth-of-type(even) {
+.article-container table tbody tr:nth-child(even) {
     background-color: #f3f3f3;
 }
 
-table tbody tr:last-of-type {
-    border-bottom: 2px solid #009879;
+/* Code blocks */
+.article-container pre {
+    background: #282c34;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 20px 0;
+    font-size: 0.9em;
 }
 
-table tbody tr.active-row {
-    font-weight: bold;
-    color: #009879;
+.article-container code {
+    font-family: "Courier New", Courier, monospace;
+    background: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: #d63384;
 }
+
+/* Images */
+.article-container img {
+    max-width: 100%;
+    display: block;
+    margin: 20px auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+
+/* ============================================================
+   📌 RESPONSIVE DESIGN
+   ============================================================ */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+    }
+    .sidebar {
+        margin-left: 0;
+        margin-top: 20px;
+    }
+    .projects-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur mobile */
+    }
+
+    .article-container {
+        padding: 15px;
+        margin: 20px;
+    }
+    .article-container h1 {
+        font-size: 1.8em;
+    }
+    .article-container h2 {
+        font-size: 1.5em;
+    }
+}
+
 
 )";
 
@@ -365,6 +600,13 @@ std::string markdownToHTML(const std::string& markdown) {
     return html;
 }
 
+static const char *mainContainer = R"(
+
+<main class="main-container">
+    <section class="content-container">
+
+)"
+
 void generateIndexPage(const std::string& outputDir, const std::vector<std::tuple<std::string, std::string, std::string>>& articles) {
     size_t articlesPerPage = 10;
     size_t totalPages = (articles.size() + articlesPerPage - 1) / articlesPerPage;
@@ -380,9 +622,16 @@ void generateIndexPage(const std::string& outputDir, const std::vector<std::tupl
                   << "<link rel=\"stylesheet\" href=\"style.css\">\n"
                   << "</head>\n<body>\n";
                   
-        indexFile << customHeader << "<div style=\"padding: 10px;\">\n";
+        indexFile << customHeader << mainContainer;
 
         indexFile << "<h2>Blog Index - Page " << (page + 1) << "</h2>\n<ul>\n";
+
+
+        <ul class="blog-list">
+    <li>
+        <span class="blog-date">[2024-01-05]</span>
+        <a href="2024-01-05-1k-micro-vm-and-assembler-cpp/index.html" class="blog-link">Une micro VM et un assembleur en 1000 lignes de C++</a>
+    </li>
 
         for (size_t i = page * articlesPerPage; i < std::min((page + 1) * articlesPerPage, articles.size()); ++i) {
             const auto& [articleTitle, articleLink, articleDate] = articles[i];
