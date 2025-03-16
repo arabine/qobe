@@ -4,10 +4,14 @@
 #include <sstream>
 #include <string>
 #include <regex>
-#include <unordered_map>
+
 
 namespace fs = std::filesystem;
 
+
+// =========================================================================
+// HEADER OPTIONAL CUSTOMISATION
+// =========================================================================
 static const char *defaultHeader = R"(
 <header>
     <h1>D8S EURL Blog</h1>
@@ -17,364 +21,119 @@ static const char *defaultHeader = R"(
 
 static std::string customHeader;
 
+
+// =========================================================================
+// FOOTER OPTIONAL CUSTOMISATION
+// =========================================================================
+static const char *defaultFooter = R"(
+<footer>
+    <p>&copy; 2025 D8S EURL - Tous droits réservés.</p>
+</footer>
+
+
+)";
+
+static std::string customFooter;
+
+// =========================================================================
+// ASIDE OPTIONAL CUSTOMISATION
+// =========================================================================
+static const char *defaultAside = R"(
+<aside class="sidebar">
+    <h2>Projets</h2>
+    <div class="projects-grid">
+        <div class="project">
+            <a href="https://example.com/projet1" target="_blank">
+                <img src="https://placehold.co/600x400" alt="Projet 1">
+                <div class="overlay">Projet 1</div>
+            </a>
+        </div>
+        <div class="project">
+            <a href="https://example.com/projet2" target="_blank">
+                <img src="https://placehold.co/600x400" alt="Projet 2">
+                <div class="overlay">Projet 2</div>
+            </a>
+        </div>
+        <div class="project">
+            <a href="https://example.com/projet3" target="_blank">
+                <img src="https://placehold.co/600x400" alt="Projet 3">
+                <div class="overlay">Projet 3</div>
+            </a>
+        </div>
+    </div>
+</aside>
+
+)";
+
+static std::string customAside;
+
+
 // Default CSS file 
 static const char *defaultCssFile = R"(
-/* ============================================================
-   🏠 GENERAL STYLES
-   ============================================================ */
+/* Général */
 body {
     font-family: Arial, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f9f9f9;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
 }
 
-/* ============================================================
-   📌 HEADER
-   ============================================================ */
-header {
-    background: #222;
-    color: white;
-    padding: 20px;
-    text-align: center;
-}
-
-/* ============================================================
-   📌 FOOTER (Toujours collé en bas)
-   ============================================================ */
-footer {
-    background: #222;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    margin-top: auto;
-}
-
-/* ============================================================
-   📌 MAIN LAYOUT
-   ============================================================ */
+/* Conteneurs principaux */
 .main-container {
     display: flex;
-    flex: 1;
-    justify-content: space-between;
     max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 20px;
+    margin: auto;
+    padding: 20px;
 }
 
-/* ============================================================
-   📌 SECTION PRINCIPALE (Blog)
-   ============================================================ */
 .content-container {
     flex: 3;
-    padding: 20px;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Liste des entrées de blog */
-ul.blog-list {
-    list-style: none;
-    padding: 0;
-}
-
-ul.blog-list li {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    transition: background 0.3s;
-}
-
-ul.blog-list li:hover {
-    background: #f5f5f5;
-}
-
-/* Style de la date */
-.blog-date {
-    font-weight: bold;
-    color: #555;
-    font-size: 0.9em;
-    margin-right: 10px;
-    padding: 5px 10px;
-    background: #eee;
-    border-radius: 5px;
-    min-width: 90px;
-    text-align: center;
-}
-
-/* Style du lien */
-.blog-link {
-    color: #007BFF;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s;
-}
-
-.blog-link:hover {
-    color: #0056b3;
-}
-
-/* Suppression de l’underscore par défaut */
-.blog-link:focus,
-.blog-link:active {
-    text-decoration: none;
-}
-
-/* ============================================================
-   📌 SIDEBAR (MOZAÏQUE DE PROJETS)
-   ============================================================ */
 .sidebar {
     flex: 1;
-    background: #fff;
-    padding: 20px;
     margin-left: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.sidebar h2 {
-    text-align: center;
-}
-
-/* ============================================================
-   📌 MOSAÏQUE DE PROJETS (Toujours sur 3 colonnes)
-   ============================================================ */
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Toujours 3 colonnes */
-    gap: 10px;
-    justify-items: center;
-    padding-top: 10px;
-}
-
-/* Conteneur d'un projet */
-.project {
-    position: relative;
-    width: 100%;
-    max-width: 200px;
-}
-
-/* Image du projet */
-.project img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-radius: 5px;
-    transition: transform 0.3s ease;
-}
-
-/* Effet hover sur l'image */
-.project:hover img {
-    transform: scale(1.05);
-}
-
-/* Overlay avec titre */
-.overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
+/* Header & Footer */
+header, footer {
     text-align: center;
     padding: 10px;
-    font-size: 1em;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    background: #ddd;
 }
 
-/* Afficher overlay au hover */
-.project:hover .overlay {
-    opacity: 1;
-}
-
-/* ============================================================
-   📌 LIENS & BOUTONS
-   ============================================================ */
+/* Liens */
 a {
-    color: #007BFF;
     text-decoration: none;
 }
 
-a:hover {
-    text-decoration: underline;
+/* Liste d'articles */
+.blog-list {
+    padding: 0;
+    list-style: none;
 }
 
-/* Bouton Next */
-.next-button {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 10px 15px;
-    background: #007BFF;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background 0.3s;
+.blog-list li {
+    display: flex;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid #ccc;
 }
 
-.next-button:hover {
-    background: #0056b3;
-}
-
-/* ============================================================
-   📌 ARTICLE PAGE STYLES
-   ============================================================ */
-.article-container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.article-container h1 {
-    font-size: 2.2em;
-    color: #222;
+/* Pagination */
+.pagination {
     text-align: center;
-    margin-bottom: 20px;
+    margin-top: 10px;
 }
 
-.article-container h2 {
-    font-size: 1.8em;
-    margin-top: 30px;
-    color: #333;
-    border-bottom: 2px solid #007BFF;
-    padding-bottom: 5px;
-}
-
-.article-container h3 {
-    font-size: 1.5em;
-    margin-top: 20px;
-    color: #444;
-}
-
-.article-container p {
-    font-size: 1.1em;
-    line-height: 1.8;
-    color: #444;
-    margin-bottom: 15px;
-}
-
-/* Citations et notes */
-.article-container blockquote {
-    background: #f5f5f5;
-    border-left: 5px solid #007BFF;
-    margin: 20px 0;
-    padding: 15px;
-    font-style: italic;
-    color: #555;
-}
-
-/* Navigation retour */
-.back-button {
-    display: inline-block;
-    margin-bottom: 20px;
-    padding: 10px 15px;
-    background: #007BFF;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background 0.3s;
-}
-
-.back-button:hover {
-    background: #0056b3;
-}
-
-/* Tables */
-.article-container table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    font-size: 1em;
-    border-radius: 5px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.article-container table thead tr {
-    background-color: #007BFF;
-    color: white;
-    text-align: left;
-    font-weight: bold;
-}
-
-.article-container table th,
-.article-container table td {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-}
-
-.article-container table tbody tr:nth-child(even) {
-    background-color: #f3f3f3;
-}
-
-/* Code blocks */
-.article-container pre {
-    background: #282c34;
-    color: #f8f8f2;
-    padding: 15px;
-    border-radius: 5px;
-    overflow-x: auto;
-    margin: 20px 0;
-    font-size: 0.9em;
-}
-
-.article-container code {
-    font-family: "Courier New", Courier, monospace;
-    background: #f4f4f4;
-    padding: 2px 4px;
-    border-radius: 4px;
-    color: #d63384;
-}
-
-/* Images */
-.article-container img {
-    max-width: 100%;
-    display: block;
-    margin: 20px auto;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-
-/* ============================================================
-   📌 RESPONSIVE DESIGN
-   ============================================================ */
-@media (max-width: 768px) {
-    .main-container {
-        flex-direction: column;
-    }
-    .sidebar {
-        margin-left: 0;
-        margin-top: 20px;
-    }
-    .projects-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur mobile */
-    }
-
-    .article-container {
-        padding: 15px;
-        margin: 20px;
-    }
-    .article-container h1 {
-        font-size: 1.8em;
-    }
-    .article-container h2 {
-        font-size: 1.5em;
-    }
+.pagination-button {
+    padding: 5px 10px;
+    border: 1px solid #000;
+    background: #eee;
 }
 
 
 )";
+
 
 std::tuple<std::string, std::string, std::string> removeYAMLHeaderAndExtractTitle(const std::string& markdown) {
     std::istringstream stream(markdown);
@@ -600,55 +359,66 @@ std::string markdownToHTML(const std::string& markdown) {
     return html;
 }
 
-static const char *mainContainer = R"(
 
-<main class="main-container">
-    <section class="content-container">
-
-)"
-
-void generateIndexPage(const std::string& outputDir, const std::vector<std::tuple<std::string, std::string, std::string>>& articles) {
-    size_t articlesPerPage = 10;
-    size_t totalPages = (articles.size() + articlesPerPage - 1) / articlesPerPage;
-
-    for (size_t page = 0; page < totalPages; ++page) {
-        std::string pageFileName = (page == 0) ? "index.html" : ("index" + std::to_string(page + 1) + ".html");
-        fs::path pagePath = fs::path(outputDir) / pageFileName;
+void generateIndexPage(const std::string& outputDir, const std::vector<std::tuple<std::string, std::string, std::string>>& articles)
+{
+        fs::path pagePath = fs::path(outputDir) / "index.html";
         std::ofstream indexFile(pagePath);
 
-        indexFile << "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
-                  << "<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                  << "<title>Blog Index - Page " << (page + 1) << "</title>\n"
-                  << "<link rel=\"stylesheet\" href=\"style.css\">\n"
-                  << "</head>\n<body>\n";
-                  
-        indexFile << customHeader << mainContainer;
+        indexFile << R"(<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Blog Index</title>
+            <link rel="stylesheet" href="style.css" />
+        </head>
+        <body>)";
 
-        indexFile << "<h2>Blog Index - Page " << (page + 1) << "</h2>\n<ul>\n";
+        indexFile << customHeader;
+
+        indexFile << R"(
+
+        <main class="main-container">
+            <section class="content-container">
+
+                <h2>Blog Index</h2>
+                <ul id="blog-list" class="blog-list">
+        )";
 
 
-        <ul class="blog-list">
-    <li>
-        <span class="blog-date">[2024-01-05]</span>
-        <a href="2024-01-05-1k-micro-vm-and-assembler-cpp/index.html" class="blog-link">Une micro VM et un assembleur en 1000 lignes de C++</a>
-    </li>
-
-        for (size_t i = page * articlesPerPage; i < std::min((page + 1) * articlesPerPage, articles.size()); ++i) {
+        for (size_t i = 0; i < articles.size(); i++) {
             const auto& [articleTitle, articleLink, articleDate] = articles[i];
-            indexFile << "<li>[" << articleDate << "] <a href=\"" << articleLink << "\">" << articleTitle << "</a></li>\n";
+            indexFile << R"(<li>
+                <span class="blog-date">[
+            )" << articleDate << "]</span> <a href=\"" << articleLink << "\"  class=\"blog-link\">" << articleTitle << "</a></li>\n";
         }
 
-        indexFile << "</ul>\n";
+        indexFile << R"(
+            <!-- Pagination -->
+                    <div class="pagination">
+                        <button id="prev-button" class="pagination-button" disabled>Précédent</button>
+                        <span id="page-info"></span>
+                        <button id="next-button" class="pagination-button">Suivant</button>
+                    </div>
+                </section>
 
-        if (page > 0) {
-            indexFile << "<a href=\"index" << (page == 1 ? "" : std::to_string(page)) << ".html\">Previous</a>\n";
-        }
-        if (page + 1 < totalPages) {
-            indexFile << "<a href=\"index" << (page + 2) << ".html\">Next</a>\n";
-        }
 
-        indexFile << "</div></body>\n</html>\n";
-    }
+            )";
+
+        indexFile << customAside;
+
+        indexFile << R"(
+            </main>
+        )";
+
+        indexFile << customFooter;
+
+        indexFile << R"(
+            </body>
+            </html>
+        )";
+
 }
 
 void generateBlog(const std::string& inputDir, const std::string& outputDir) {
@@ -724,6 +494,7 @@ void generateBlog(const std::string& inputDir, const std::string& outputDir) {
     generateIndexPage(outputDir, articles);
 }
 
+
 void generateDefaultCss(const fs::path& outputDir) {
     fs::path cssFilePath = outputDir / "style.css";
     std::ofstream cssFile(cssFilePath);
@@ -748,29 +519,88 @@ void getHeaderIfExists(const fs::path& inputDir) {
     }
 }
 
+void getAsideIfExists(const fs::path& inputDir) {
+    fs::path asideFilePath = inputDir / "aside.html";
+    std::ifstream asideFile(asideFilePath);
+    if (asideFile.is_open()) {
+        customAside = std::string((std::istreambuf_iterator<char>(asideFile)), std::istreambuf_iterator<char>());
+        asideFile.close();
+    } else {
+        customAside = std::string(defaultAside);
+        std::cerr << "Aside file not found, using default" <<  std::endl;
+    }
+}
+
+
+void getFooterIfExists(const fs::path& inputDir) {
+    fs::path footerFilePath = inputDir / "footer.html";
+    std::ifstream footerFile(footerFilePath);
+    if (footerFile.is_open()) {
+        customFooter = std::string((std::istreambuf_iterator<char>(footerFile)), std::istreambuf_iterator<char>());
+        footerFile.close();
+    } else {
+        customFooter = std::string(defaultFooter);
+        std::cerr << "Footer file not found, using default" <<  std::endl;
+    }
+}
+
+
+void copy_directory(const fs::path& source, const fs::path& destination) {
+    if (!fs::exists(source) || !fs::is_directory(source)) {
+        std::cerr << "Erreur : Le répertoire source n'existe pas ou n'est pas un dossier.\n";
+        return;
+    }
+
+    // Parcourir récursivement le répertoire source
+    for (const auto& entry : fs::recursive_directory_iterator(source)) {
+        fs::path dest_path = destination / fs::relative(entry.path(), source);
+
+        try {
+            if (fs::is_directory(entry.status())) {
+                // Créer les sous-dossiers dans la destination
+                fs::create_directories(dest_path);
+            } else if (fs::is_regular_file(entry.status())) {
+                // Copier le fichier
+                fs::copy_file(entry.path(), dest_path, fs::copy_options::overwrite_existing);
+            }
+        } catch (const fs::filesystem_error& e) {
+            std::cerr << "Erreur lors de la copie de " << entry.path() << ": " << e.what() << '\n';
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <input_directory> <output_directory>" << std::endl;
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " <input_directory> <output_directory> [optional]<custom_directory>" << std::endl;
         return 1;
     }
 
     std::string inputDir = argv[1];
     std::string outputDir = argv[2];
+    std::string optionalDir;
+
+    if (argc == 4) {
+        optionalDir = argv[3];
+    }
 
     if (!fs::exists(outputDir)) {
         fs::create_directories(outputDir);
     }
 
-    getHeaderIfExists(inputDir);
+    getHeaderIfExists(optionalDir);
+
+    getAsideIfExists(optionalDir);
+
+    getFooterIfExists(optionalDir);
+
+    // We generate a default CSS file, overrided by a custom CSS if exists
+    generateDefaultCss(outputDir);
 
     generateBlog(inputDir, outputDir);
 
-    fs::path cssPath = fs::path(inputDir) / "style.css";
-    if (fs::exists(cssPath)) {
-        fs::copy(cssPath, outputDir, fs::copy_options::overwrite_existing);
-    } else {
-        // Dump default css
-        generateDefaultCss(outputDir);
+
+    if (optionalDir.size() > 0) {
+        copy_directory(optionalDir, outputDir);
     }
 
     std::cout << "Blog generated successfully in " << outputDir << std::endl;
